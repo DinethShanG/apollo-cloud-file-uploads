@@ -67,6 +67,7 @@ export class AWSS3Uploader implements ApolloServerFileUploads.IUploader {
     stream.pipe(uploadStream.writeStream);
     const result = await uploadStream.promise;
 
+    console.log(result)
     return { filename, mimetype, encoding, url: result.Location };
   }
 

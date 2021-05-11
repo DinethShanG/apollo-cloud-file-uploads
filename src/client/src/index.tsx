@@ -2,26 +2,23 @@ import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
 import "./index.css"
+import { createUploadLink } from 'apollo-upload-client';
 
 import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
 } from "@apollo/client";
-import { createUploadLink } from 'apollo-upload-client'
 
-/**
- * Key notes:
- * - We need to use apollo-upload-client in order to make uploads work
- *   for some reason.
- */
+const uploadLink = createUploadLink({
+  uri: 'http://localhost:4000/graphql',
+})
+
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
-  //@ts-ignore
-  link: createUploadLink({
-    uri: "http://localhost:4000",
-  }),
+  // @ts-ignore
+  link: uploadLink
 });
 
 ReactDOM.render(

@@ -1,27 +1,25 @@
 
 import { ApolloServer, gql } from 'apollo-server'
 import { AWSS3Uploader } from '../lib/uploaders/s3';
-import { CloudinaryUploader } from '../lib/uploaders/cloudinary';
+import { GraphQLUpload } from 'graphql-upload';
+import dotenv from 'dotenv';
 
 /**
  * Right now, I'm using the Cloudinary Uploader, but you can go 
  * ahead and swap this one out for the S3 one below, or write your own.
  */
-
-const cloudinaryUploader = new CloudinaryUploader({
-  cloudname: process.env.CLOUDINARY_CLOUD_NAME,
-  apiKey: process.env.CLOUDINARY_API_KEY,
-  apiSecret: process.env.CLOUDINARY_API_KEY
-})
+dotenv.config();
 
 const s3Uploader = new AWSS3Uploader({ 
-  accessKeyId: process.env.AWS_ACCESS_KEY,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  destinationBucketName: 'test-graphql-uploads'
+  accessKeyId: process.env.ACCESS_KEY_ID,
+  secretAccessKey: process.env.SECRET_ACCESS_KEY,
+  destinationBucketName: process.env.BUCKET_NAME
 });
 
 const server = new ApolloServer({
   typeDefs: gql`
+  
+    scalar Upload
   
     type UploadedFileResponse {
       filename: String!
@@ -40,25 +38,17 @@ const server = new ApolloServer({
     }
   `,
   resolvers: {
+    Upload: GraphQLUpload,
     Query: {
       hello: () => "Hey!"
     },
     Mutation: {
 
-      /**
-       * This is where we hook up the file uploader that does all of the
-       * work of uploading the files. With Cloudinary and S3, it will:
-       * 
-       * 1. Upload the file
-       * 2. Return an UploadedFileResponse with the url it was uploaded to.
-       * 
-       * Feel free to pick through the code an IUploader in order to 
-       */
-
-      singleUpload: cloudinaryUploader.singleFileUploadResolver.bind(cloudinaryUploader),
-      multipleUpload: cloudinaryUploader.multipleUploadsResolver.bind(cloudinaryUploader)
+      singleUpload: s3Uploader.singleFileUploadResolver.bind(s3Uploader),
+      multipleUpload: s3Uploader.multipleUploadsResolver.bind(s3Uploader)
     }
-  }
+  },
+  uploads:false,
 });
 
 server.listen().then(({ url }) => {

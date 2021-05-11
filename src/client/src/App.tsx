@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useMutation, gql } from "@apollo/client";
 
 const SINGLE_UPLOAD = gql`
-  mutation($file: Upload!) {
+  mutation uploadFile($file: Upload!) {
     singleUpload(file: $file) {
       filename
       mimetype
@@ -36,7 +36,7 @@ const UploadFile = () => {
       <br/>
       {Object.keys(lastUploaded).length !== 0 && (
         <div>
-          {" "}
+          {console.log(data)}
           Last uploaded details => {JSON.stringify(lastUploaded, null, 2)}{" "}
         </div>
       )}
